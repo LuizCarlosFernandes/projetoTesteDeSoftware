@@ -23,6 +23,16 @@ public class Room
     private String description;
     private HashMap<String, Room> exits;        // stores exits of this room.
 
+    private Item item; // Adicione este atributo
+
+    public void setItem(Item item) { this.item = item; }
+    public Item getItem() { return item; }
+    public Item takeItem() {
+        Item temp = item;
+        item = null;
+        return temp;
+    }
+
     /**
      * Create a room described "description". Initially, it has
      * no exits. "description" is something like "a kitchen" or

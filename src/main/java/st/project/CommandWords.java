@@ -57,7 +57,7 @@ public class CommandWords
     }
 
     /**
-     * Print all valid commands to System.out.
+     * Print all valid commands to gui.printMessage.
      */
     public void showAll() 
     {
@@ -66,4 +66,15 @@ public class CommandWords
         }
         System.out.println();
     }
+
+    public String getCommandList()
+    {
+        String returnString = "";
+        for(String command : validCommands.keySet()) {
+            returnString += command + "  ";
+        }
+        return returnString;
+    }
+
+
 }
