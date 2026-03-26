@@ -177,9 +177,14 @@ public class Game
                 gui.printMessage("Você encontrou a Chave Secreta!");
             }
 
-            if(currentRoom.getShortDescription().contains("admin office") && hasKey) {
-                gui.printMessage("MISSÃO CUMPRIDA! Você abriu o cofre com a chave.");
-                System.exit(0);
+            if(currentRoom.getShortDescription().contains("admin office")) {
+                if(!hasKey) {
+                    gui.printMessage("Existe um cofre nessa sala, mas ele está trancado! \nprocure a chave para abrir o cofre.");
+                }
+                else {
+                    gui.printMessage("MISSÃO CUMPRIDA! Você abriu o cofre com a chave.");
+                    //System.exit(0);
+                }
             }
 
             gui.printMessage(currentRoom.getLongDescription());
