@@ -1,5 +1,7 @@
 package st.project;
 
+import javax.swing.Timer;
+
 /**
  *  This class is the main class of the "World of Zuul" application. 
  *  "World of Zuul" is a very simple, text based adventure game.  Users 
@@ -21,23 +23,32 @@ public class Game
 {
     private Parser parser;
     private Room currentRoom;
-
     private GameGUI gui;
-    private boolean hasKey = false;
+
+        //VARIAVEIS DA MISSÃO
+    private boolean hasKeyAdmin = false;
+    private boolean hasKeyAuditorium = false;
+    private boolean hasKeyGate =  false;
 
 
     /**
      * Create the game and initialise its internal map.
      */
-    public Game() {
+    public Game()
+    {
+        // 1. Cria as salas primeiro
         createRooms();
 
-        this.parser = new Parser();
-        this.gui = new GameGUI(this);
+        // 2. Inicializa o parser
+        parser = new Parser();
 
+        // 3. Inicializa a GUI com imagens
+        gui = new GameGUI(this);
 
-        gui.printMessage("Bem-vindo ao World of Zuul!");
-        gui.printMessage(currentRoom.getLongDescription());
+        // Exibe o estado inicial
+        gui.updateImage(currentRoom.getImagePath());
+        gui.updatePath("Bem-vindo ao World of Zuul!");
+        gui.updatePath(currentRoom.getLongDescription());
     }
 
     /**
@@ -45,28 +56,41 @@ public class Game
      */
     private void createRooms()
     {
-        Room outside, theatre, pub, lab, office;
+        Room outside, theatre, pub, lab, office, home;
 
         // create the rooms
-        outside = new Room("outside the main entrance of the University");
-        theatre = new Room("in a lecture theatre");
-        pub = new Room("in the campus pub");
-        lab = new Room("in a computing lab");
-        office = new Room("in the computing admin office");
+        outside = new Room("outside the main entrance", "src/images/outside.jpeg");
+        theatre = new Room("in a lecture theatre", "src/images/auditorium.png");
+        pub = new Room("in the campus pub", "src/images/pub.jpeg");
+        lab = new Room("in a computing lab", "src/images/computing_lab.png");
+        office = new Room("in the admin office", "src/images/admin.png");
+        home = new Room("my home", "src/images/home.png");
+
+
+        // Inicialização dos itens (Missão)
+        Item chaveAuditorium = new Item("Chave do auditório", "Usada para encontrar com o professor.");
+        pub.setItem(chaveAuditorium); // A chave do auditorio está no pub
+
+        Item chaveOffice = new Item("Chave da sala de administração", "Usada para entrar na sala da admnistração.");
+        theatre.setItem(chaveOffice);
+
+        Item chaveGate = new Item("Chave do portão principal", "Usada para sair da faculdade");
+        office.setItem(chaveGate);
 
         // initialise room exits
-        outside.setExit("east", theatre);
-        outside.setExit("south", lab);
-        outside.setExit("west", pub);
+        outside.setExit("direita", theatre);
+        outside.setExit("cima", lab);
+        outside.setExit("esquerda", pub);
+        outside.setExit("baixo", home);
 
-        theatre.setExit("west", outside);
+        theatre.setExit("cima", outside);
 
-        pub.setExit("east", outside);
+        pub.setExit("baixo", outside);
 
-        lab.setExit("north", outside);
-        lab.setExit("east", office);
+        lab.setExit("baixo", outside);
+        lab.setExit("cima", office);
 
-        office.setExit("west", lab);
+        office.setExit("baixo", lab);
 
         currentRoom = outside;  // start game outside
     }
@@ -154,40 +178,36 @@ public class Game
     private void goRoom(Command command)
     {
         if(!command.hasSecondWord()) {
-            // if there is no second word, we don't know where to go...
-            gui.printMessage("Go where?");
+            gui.updatePath("Ir para onde?");
             return;
         }
 
         String direction = command.getSecondWord();
-
-        // Try to leave current room.
         Room nextRoom = currentRoom.getExit(direction);
 
         if (nextRoom == null) {
-            gui.printMessage("There is no door!");
+            gui.updatePath("Não há uma porta!");
+        }
+        else if(nextRoom.getShortDescription().contains("office") && !hasKeyAdmin){
+            gui.updatePath("A porta está trancada, ache o professor antes de ir para essa sala");
+        }
+        else if(nextRoom.getShortDescription().contains("theatre") && !hasKeyAuditorium){
+            gui.updatePath("A porta está trancada, a chave pode estar no barzinho");
+        }
+        else if(nextRoom.getShortDescription().contains("home") && !hasKeyGate){
+            gui.updatePath("O portão parece estar trancado, pegue a chave na sala de administração para abrir.");
         }
         else {
             currentRoom = nextRoom;
-            gui.updatePath(currentRoom.getShortDescription());
 
-            // Lógica da Missão
-            if(currentRoom.getShortDescription().contains("pub") && !hasKey) {
-                hasKey = true;
-                gui.printMessage("Você encontrou a Chave Secreta!");
-            }
 
-            if(currentRoom.getShortDescription().contains("admin office")) {
-                if(!hasKey) {
-                    gui.printMessage("Existe um cofre nessa sala, mas ele está trancado! \nprocure a chave para abrir o cofre.");
-                }
-                else {
-                    gui.printMessage("MISSÃO CUMPRIDA! Você abriu o cofre com a chave.");
-                    //System.exit(0);
-                }
-            }
 
-            gui.printMessage(currentRoom.getLongDescription());
+            // ATUALIZAÇÃO GRÁFICA: Imagem e Texto
+            gui.updateImage(currentRoom.getImagePath());
+            gui.updatePath(currentRoom.getLongDescription());
+
+            // Lógica da Missão Integrada à Movimentação
+            checkMissionEvents();
         }
     }
 
@@ -208,13 +228,65 @@ public class Game
     }
 
     public void processInputFromUI(String input) {
-        // Transformamos a String da interface em um objeto Command
+        if (input == null || input.trim().isEmpty()) { return; }
+
+        // Ecoa o comando na tela
+        gui.updatePath("Comando: " + input);
+
         Command command = parser.parseString(input);
         boolean wantToQuit = processCommand(command);
 
         if (wantToQuit) {
-            gui.printMessage("Obrigado por jogar. Tchau!");
-            System.exit(0);
+            gui.updatePath("Obrigado por jogar. Tchau!");
+            Timer timer = new Timer(2000, e -> System.exit(0));
+            timer.setRepeats(false);
+            timer.start();
+        }
+    }
+
+    private void checkMissionEvents() {
+        // Evento 1: Encontrar a chave no Pub
+        if(currentRoom.getShortDescription().contains("pub") && currentRoom.getItem() != null) {
+            if(currentRoom.getItem().getNome().equals("Chave do auditório")) {
+                currentRoom.takeItem(); // Remove da sala
+                hasKeyAuditorium = true;
+                gui.updatePath("Você encontrou a chave do auditório");
+            }
+        }
+
+        // Evento 2: Falar com o professor
+        if(currentRoom.getShortDescription().contains("outside") && hasKeyAuditorium && !hasKeyAdmin) {
+            gui.updatePath("Vá para o auditório para pegar a chave com o professor");
+        }
+
+        //Evento 3: Pegar chave com o professor
+        if(currentRoom.getShortDescription().contains("theatre") && currentRoom.getItem() != null) {
+            if(currentRoom.getItem().getNome().equals("Chave da sala de administração")){
+                currentRoom.takeItem();
+                hasKeyAdmin = true;
+                gui.updatePath("Você falou com o professor e pegou a chave da sala de administração");
+            }
+        }
+
+        //Evento 4: Pegar a chave na sala de administração
+
+        if(currentRoom.getShortDescription().contains("office") && currentRoom.getItem() != null) {
+            if(currentRoom.getItem().getNome().equals("Chave do portão principal")){
+                currentRoom.takeItem();
+                hasKeyGate = true;
+                gui.updatePath("Agora que você possui a chave do portão, pode abri-lo para ir embora");
+            }
+        }
+
+        //Evento 5: Abrir o portão e ir embora
+        if(currentRoom.getShortDescription().contains("outside") && hasKeyGate) {
+            gui.updatePath("Agora você pode abrir o portão e ir embora.");
+        }
+
+        //Evento 6: EOG
+        if(currentRoom.getShortDescription().contains("home")){
+           gui.updatePath("Parabêns, você finalizou o jogo.");
         }
     }
 }
+

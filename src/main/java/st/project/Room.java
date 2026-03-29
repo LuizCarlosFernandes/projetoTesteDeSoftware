@@ -21,6 +21,7 @@ import java.util.Iterator;
 public class Room 
 {
     private String description;
+    private String imagePath;                    // store the path to the image of the room
     private HashMap<String, Room> exits;        // stores exits of this room.
 
     private Item item; // Adicione este atributo
@@ -33,15 +34,22 @@ public class Room
         return temp;
     }
 
+    public String getImagePath(){
+        return imagePath;
+    }
+
     /**
      * Create a room described "description". Initially, it has
      * no exits. "description" is something like "a kitchen" or
      * "an open court yard".
      * @param description The room's description.
      */
-    public Room(String description) 
+    public Room(String description, String imagePath)
     {
         this.description = description;
+
+        this.imagePath = imagePath;
+
         exits = new HashMap<String, Room>();
     }
 
@@ -89,6 +97,8 @@ public class Room
         }
         return returnString;
     }
+
+
 
     /**
      * Return the room that is reached if we go from this room in direction
