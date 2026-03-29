@@ -2,58 +2,53 @@ package st.project;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class GameGUI extends JFrame {
-    private JLabel imageLabel;       // Exibe a imagem da sala
-    private JTextArea pathArea;      // Registro visual do trajeto
-    private JTextField inputField;   // Entrada de comandos
+    private JLabel imageLabel;
+    private JTextArea pathArea;
     private Game game;
 
     public GameGUI(Game game) {
         super("World of Zuul - Missão Gráfica");
         this.game = game;
 
-        // --- Painel Superior: Imagem da Sala ---
+        // 1. Configuração da Imagem
         imageLabel = new JLabel();
-        imageLabel.setHorizontalAlignment(JLabel.CENTER);
         imageLabel.setPreferredSize(new Dimension(500, 300));
-        imageLabel.setBorder(BorderFactory.createEtchedBorder());
+        imageLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        // --- Painel Central: Log do Trajeto ---
+        // 2. Configuração do Texto (Trajeto)
         pathArea = new JTextArea(10, 50);
         pathArea.setEditable(false);
         pathArea.setLineWrap(true);
         pathArea.setWrapStyleWord(true);
 
+        // CRIE APENAS UM SCROLLPANE
         JScrollPane scrollPane = new JScrollPane(pathArea);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-        // --- Painel Inferior: Entrada de Comando ---
-        inputField = new JTextField(35);
-        inputField.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String commandText = inputField.getText();
-                inputField.setText("");
-                game.processInputFromUI(commandText);
-            }
-        });
-            // --- Montagem do Layout ---
+        // 3. Painel de Navegação (Setas)
+        JPanel navPanel = new JPanel(new GridLayout(3, 3, 5, 5));
+        JButton btnNorth = new JButton("↑");
+        JButton btnSouth = new JButton("↓");
+        JButton btnEast = new JButton("→");
+        JButton btnWest = new JButton("←");
+
+        navPanel.add(new JLabel("")); navPanel.add(btnNorth); navPanel.add(new JLabel(""));
+        navPanel.add(btnWest);        navPanel.add(new JLabel("MOVE", SwingConstants.CENTER)); navPanel.add(btnEast);
+        navPanel.add(new JLabel("")); navPanel.add(btnSouth); navPanel.add(new JLabel(""));
+
+        // Listeners corrigidos para as direções que o Room.java entende
+        btnNorth.addActionListener(e -> this.game.processDirection("cima"));
+        btnSouth.addActionListener(e -> this.game.processDirection("baixo"));
+        btnEast.addActionListener(e -> this.game.processDirection("direita"));
+        btnWest.addActionListener(e -> this.game.processDirection("esquerda"));
+
+        // 4. Montagem do Layout
         setLayout(new BorderLayout(10, 10));
-
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(imageLabel, BorderLayout.NORTH);
-        centerPanel.add(new JLabel("  Histórico do Trajeto e Eventos:"), BorderLayout.CENTER);
-        centerPanel.add(scrollPane, BorderLayout.SOUTH);
-
-        add(centerPanel, BorderLayout.CENTER);
-
-        JPanel southPanel = new JPanel();
-        southPanel.add(new JLabel("Comando:"));
-        southPanel.add(inputField);
-        add(southPanel, BorderLayout.SOUTH);
+        add(imageLabel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER); // Adiciona o scroll que contém o pathArea
+        add(navPanel, BorderLayout.EAST);
 
         pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -61,30 +56,19 @@ public class GameGUI extends JFrame {
         setVisible(true);
     }
 
-    public void printMessage(String message) {
-        pathArea.append(message + "\n");
+    public void updatePath(String message) {
+        pathArea.append("> " + message + "\n\n");
         pathArea.setCaretPosition(pathArea.getDocument().getLength());
     }
 
     public void updateImage(String imagePath) {
-        // Tenta carregar a imagem. Certifique-se de que a pasta 'images' está no classpath.
-        ImageIcon icon = new ImageIcon(imagePath);
-
-        // Redimensiona a imagem para caber no label mantendo a proporção (opcional)
-        Image img = icon.getImage();
-        Image newImg = img.getScaledInstance(500, 300, Image.SCALE_SMOOTH);
-        imageLabel.setIcon(new ImageIcon(newImg));
-    }
-
-    /**
-     * Atualiza o log da interface com o trajeto e eventos do jogo.
-     * @param message A mensagem ou descrição da sala a ser exibida.
-     */
-    public void updatePath(String message) {
-        // Adiciona a nova mensagem ao final do histórico atual
-        pathArea.append("> " + message + "\n\n");
-
-        // Auto-scroll para garantir que o jogador veja o último comando
-        pathArea.setCaretPosition(pathArea.getDocument().getLength());
+        try {
+            ImageIcon icon = new ImageIcon(imagePath);
+            Image img = icon.getImage();
+            Image newImg = img.getScaledInstance(500, 300, Image.SCALE_SMOOTH);
+            imageLabel.setIcon(new ImageIcon(newImg));
+        } catch (Exception e) {
+            updatePath("Erro ao carregar imagem: " + imagePath);
+        }
     }
 }

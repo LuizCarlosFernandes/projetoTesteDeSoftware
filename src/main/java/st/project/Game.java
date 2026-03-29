@@ -110,7 +110,7 @@ public class Game
             Command command = parser.getCommand();
             finished = processCommand(command);
         }
-        gui.printMessage("Thank you for playing.  Good bye.");
+        gui.updatePath("Thank you for playing.  Good bye.");
     }
 
     /**
@@ -118,12 +118,12 @@ public class Game
      */
     private void printWelcome()
     {
-        gui.printMessage("\n");
-        gui.printMessage("Welcome to the World of Zuul!");
-        gui.printMessage("World of Zuul is a new, incredibly boring adventure game.");
-        gui.printMessage("Type 'help' if you need help.");
-        gui.printMessage("\n");
-        gui.printMessage(currentRoom.getLongDescription());
+        gui.updatePath("\n");
+        gui.updatePath("Welcome to the World of Zuul!");
+        gui.updatePath("World of Zuul is a new, incredibly boring adventure game.");
+        gui.updatePath("Type 'help' if you need help.");
+        gui.updatePath("\n");
+        gui.updatePath(currentRoom.getLongDescription());
     }
 
     /**
@@ -138,7 +138,7 @@ public class Game
         CommandWord commandWord = command.getCommandWord();
 
         if(commandWord == CommandWord.UNKNOWN) {
-            gui.printMessage("I don't know what you mean...");
+            gui.updatePath("I don't know what you mean...");
             return false;
         }
 
@@ -164,10 +164,10 @@ public class Game
      */
     private void printHelp()
     {
-        gui.printMessage("You are lost. You are alone. You wander");
-        gui.printMessage("around at the University.");
-        gui.printMessage("\n");
-        gui.printMessage("Your command words are: " + parser.getCommands());
+        gui.updatePath("You are lost. You are alone. You wander");
+        gui.updatePath("around at the University.");
+        gui.updatePath("\n");
+        gui.updatePath("Your command words are: " + parser.getCommands());
 
     }
 
@@ -219,7 +219,7 @@ public class Game
     private boolean quit(Command command)
     {
         if(command.hasSecondWord()) {
-            gui.printMessage("Quit what?");
+            gui.updatePath("Quit what?");
             return false;
         }
         else {
@@ -286,6 +286,33 @@ public class Game
         //Evento 6: EOG
         if(currentRoom.getShortDescription().contains("home")){
            gui.updatePath("Parabêns, você finalizou o jogo.");
+        }
+    }
+
+    public void processDirection(String direction) {
+        Room nextRoom = currentRoom.getExit(direction);
+
+        if (nextRoom == null) {
+            gui.updatePath("Não há saída para " + direction + "!");
+        }
+        else if(nextRoom.getShortDescription().contains("office") && !hasKeyAdmin){
+            gui.updatePath("A porta está trancada, ache o professor antes de ir para essa sala");
+        }
+        else if(nextRoom.getShortDescription().contains("theatre") && !hasKeyAuditorium){
+            gui.updatePath("A porta está trancada, a chave pode estar no barzinho");
+        }
+        else if(nextRoom.getShortDescription().contains("home") && !hasKeyGate){
+            gui.updatePath("O portão parece estar trancado, pegue a chave na sala de administração para abrir.");
+        }
+        else {
+            currentRoom = nextRoom;
+
+            // Atualiza Interface
+            gui.updateImage(currentRoom.getImagePath());
+            gui.updatePath("Você foi para: " + currentRoom.getShortDescription());
+            gui.updatePath(currentRoom.getExitString()); // Mostra saídas disponíveis no log
+
+            checkMissionEvents(); // Verifica se venceu ou achou item
         }
     }
 }
