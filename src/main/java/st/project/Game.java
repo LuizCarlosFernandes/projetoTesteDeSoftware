@@ -289,20 +289,25 @@ public class Game
         }
     }
 
-    public void processDirection(String direction) {
+    //Retorna falso caso movimentação seja falha
+    public boolean processDirection(String direction) {
         Room nextRoom = currentRoom.getExit(direction);
 
         if (nextRoom == null) {
             gui.updatePath("Não há saída para " + direction + "!");
+            return false;
         }
         else if(nextRoom.getShortDescription().contains("office") && !hasKeyAdmin){
             gui.updatePath("A porta está trancada, ache o professor antes de ir para essa sala");
+            return false;
         }
         else if(nextRoom.getShortDescription().contains("theatre") && !hasKeyAuditorium){
             gui.updatePath("A porta está trancada, a chave pode estar no barzinho");
+            return false;
         }
         else if(nextRoom.getShortDescription().contains("home") && !hasKeyGate){
             gui.updatePath("O portão parece estar trancado, pegue a chave na sala de administração para abrir.");
+            return false;
         }
         else {
             currentRoom = nextRoom;
@@ -313,6 +318,7 @@ public class Game
             gui.updatePath(currentRoom.getExitString()); // Mostra saídas disponíveis no log
 
             checkMissionEvents(); // Verifica se venceu ou achou item
+            return true;
         }
     }
 }
