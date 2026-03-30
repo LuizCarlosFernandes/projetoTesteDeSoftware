@@ -59,19 +59,22 @@ public class CommandWords
     /**
      * Print all valid commands to gui.printMessage.
      */
-    public void showAll() 
+    public int showAll()
     {
+        int count = 0; //Deve ser igual a quantidade de comandos válidos, 3
         for(String command : validCommands.keySet()) {
             System.out.print(command + "  ");
+            count++;
         }
         System.out.println();
+        return count;
     }
 
     public String getCommandList()
     {
         String returnString = "";
         for(String command : validCommands.keySet()) {
-            returnString += command + "  ";
+            returnString += command + " ";
         }
         return returnString;
     }

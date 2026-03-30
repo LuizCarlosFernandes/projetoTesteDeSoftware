@@ -14,17 +14,19 @@ public class ZuulTest {
      * TESTES DE DOMÍNIO E FRONTEIRA (CommandWords & Parser)
      */
     @Test
+    @DisplayName("Teste dominio: Validez dos comandos")
     public void testCommandValidity() {
         CommandWords cw = new CommandWords();
         // Fronteira: Comando válido
-        assertTrue(cw.isCommand("go"));
+        assertThat(cw.isCommand("go")).isTrue();
         // Fronteira: Comando inválido
-        assertFalse(cw.isCommand("fly"));
-        // Fronteira: Case sensitivity (Zuul é case sensitive para comandos no HashMap)
-        assertFalse(cw.isCommand("GO"));
+        assertThat(cw.isCommand("fly")).isFalse();
+        // Fronteira: Case sensitivity (o jogo é case sensitive para comandos no HashMap)
+        assertThat(cw.isCommand("GO")).isFalse();
     }
 
     @Test
+    @DisplayName("Teste dominio: Lógica do parser")
     public void testParserLogic() {
         Parser parser = new Parser();
         // Domínio: Comando de uma palavra
@@ -32,16 +34,35 @@ public class ZuulTest {
         assertEquals(CommandWord.HELP, cmd.getCommandWord());
         assertNull(cmd.getSecondWord());
 
+        // Domínio: comando não existente
+        cmd = parser.parseString("test");
+        assertThat(cmd.isUnknown()).isTrue();
+
         // Domínio: Comando de duas palavras
         cmd = parser.parseString("go direita");
         assertEquals(CommandWord.GO, cmd.getCommandWord());
+        assertThat(cmd.hasSecondWord()).isTrue();
         assertEquals("direita", cmd.getSecondWord());
     }
 
+    @Test
+    @DisplayName("Retorna lista de comandos")
+    public void testReturnCommands() {
+        //help, go, quit
+        String commands = "help go quit ";
+
+        CommandWords cw = new CommandWords();
+        assertThat(cw.getCommandList()).isEqualTo(commands);
+
+
+        assertThat(cw.showAll()).isEqualTo(3);
+    }
+
+
     /**
-     * TESTES ESTRUTURAIS (MC/DC - Lógica de Movimentação e Missão)
-     * Focado no método processDirection e goRoom do Game.java
+     * TESTES ESTRUTURAIS (MC/DC - Lógica de Movimentação e Missão
      */
+
     @Test
     @DisplayName("Teste estrutural: indo para caminho inexistente")
     public void testInexistentPath() {

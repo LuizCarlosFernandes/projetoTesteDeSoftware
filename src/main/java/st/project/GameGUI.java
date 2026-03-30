@@ -62,13 +62,11 @@ public class GameGUI extends JFrame {
     }
 
     public void updateImage(String imagePath) {
-        try {
+
             ImageIcon icon = new ImageIcon(imagePath);
             Image img = icon.getImage();
             Image newImg = img.getScaledInstance(500, 300, Image.SCALE_SMOOTH);
             imageLabel.setIcon(new ImageIcon(newImg));
-        } catch (Exception e) {
-            updatePath("Erro ao carregar imagem: " + imagePath);
-        }
+
     }
 }
