@@ -21,7 +21,7 @@ import javax.swing.Timer;
 
 public class Game
 {
-    private Room currentRoom;
+    protected Room currentRoom;
     private GameGUI gui;
 
         //VARIAVEIS DA MISSÃO

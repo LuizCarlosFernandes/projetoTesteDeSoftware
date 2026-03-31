@@ -23,7 +23,7 @@ public class GameGUI extends JFrame {
         pathArea.setLineWrap(true);
         pathArea.setWrapStyleWord(true);
 
-        // CRIE APENAS UM SCROLLPANE
+
         JScrollPane scrollPane = new JScrollPane(pathArea);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 

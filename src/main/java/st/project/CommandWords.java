@@ -45,42 +45,6 @@ public class CommandWords
             return CommandWord.UNKNOWN;
         }
     }
-    
-    /**
-     * Check whether a given String is a valid command word. 
-     * @return true if it is, false if it isn't.
-     */
-    public boolean isCommand(String aString)
-    {
-        return validCommands.containsKey(aString);
-    }
-
-    /**
-     * Print all commands and count it
-     * @return counts of commands
-     */
-    public int showAll()
-    {
-        int count = 0; //Deve ser igual a quantidade de comandos válidos, 3
-        for(String command : validCommands.keySet()) {
-            System.out.print(command + "  ");
-            count++;
-        }
-        System.out.println();
-        return count;
-    }
-
-    /**
-     * @return String of all commands
-     */
-    public String getCommandList()
-    {
-        String returnString = "";
-        for(String command : validCommands.keySet()) {
-            returnString += command + " ";
-        }
-        return returnString;
-    }
 
 
 }
