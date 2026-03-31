@@ -26,7 +26,6 @@ public class CommandWords
     {
         validCommands = new HashMap<String, CommandWord>();
         validCommands.put("go", CommandWord.GO);
-        validCommands.put("help", CommandWord.HELP);
         validCommands.put("quit", CommandWord.QUIT);
     }
 
@@ -57,7 +56,8 @@ public class CommandWords
     }
 
     /**
-     * Print all valid commands to gui.printMessage.
+     * Print all commands and count it
+     * @return counts of commands
      */
     public int showAll()
     {
@@ -70,6 +70,9 @@ public class CommandWords
         return count;
     }
 
+    /**
+     * @return String of all commands
+     */
     public String getCommandList()
     {
         String returnString = "";

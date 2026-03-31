@@ -1,6 +1,6 @@
 package st.project;
 
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,25 +13,15 @@ public class ZuulTest {
     /**
      * TESTES DE DOMÍNIO E FRONTEIRA (CommandWords & Parser)
      */
-    @Test
-    @DisplayName("Teste dominio: Validez dos comandos")
-    public void testCommandValidity() {
-        CommandWords cw = new CommandWords();
-        // Fronteira: Comando válido
-        assertThat(cw.isCommand("go")).isTrue();
-        // Fronteira: Comando inválido
-        assertThat(cw.isCommand("fly")).isFalse();
-        // Fronteira: Case sensitivity (o jogo é case sensitive para comandos no HashMap)
-        assertThat(cw.isCommand("GO")).isFalse();
-    }
+
 
     @Test
     @DisplayName("Teste dominio: Lógica do parser")
     public void testParserLogic() {
         Parser parser = new Parser();
         // Domínio: Comando de uma palavra
-        Command cmd = parser.parseString("help");
-        assertEquals(CommandWord.HELP, cmd.getCommandWord());
+        Command cmd = parser.parseString("quit");
+        assertEquals(CommandWord.QUIT, cmd.getCommandWord());
         assertNull(cmd.getSecondWord());
 
         // Domínio: comando não existente
@@ -45,18 +35,33 @@ public class ZuulTest {
         assertEquals("direita", cmd.getSecondWord());
     }
 
+    //CommandsWordsTest
     @Test
-    @DisplayName("Retorna lista de comandos")
-    public void testReturnCommands() {
-        //help, go, quit
-        String commands = "help go quit ";
-
+    @DisplayName("Teste de dominio: comandos válidos")
+    public void testCommandValidity() {
         CommandWords cw = new CommandWords();
-        assertThat(cw.getCommandList()).isEqualTo(commands);
 
+        assertThat(cw.isCommand("go")).isTrue(); //Comando realmente existe
+        assertThat(cw.isCommand("fly")).isFalse(); //Comando inexistente
+        assertThat(cw.isCommand("GO")).isFalse(); // Case sensitivity
 
-        assertThat(cw.showAll()).isEqualTo(3);
     }
+
+    @Test
+    @DisplayName("Teste de dominio: lista de comandos")
+    public void testListCommands() {
+        CommandWords cw = new CommandWords();
+
+        //Comandos esperados
+        String commands = "go quit ";
+        //Número de comandos esperados
+        int commandsCount = 2;
+
+
+        assertThat(cw.getCommandList()).isEqualTo(commands);
+        assertThat(cw.showAll()).isEqualTo(commandsCount);
+    }
+
 
 
     /**
@@ -76,7 +81,6 @@ public class ZuulTest {
     public void testLockedAuditorium() {
         //Entrando no auditorio antes de entrar pegar a chave.
         assertThat(game.processDirection("direita")).isFalse();
-        // 2. Teste de Bloqueio: Theatre sem chave (Condição: nextRoom.contains("theatre") && !hasKeyAuditorium)
     }
     @Test
     @DisplayName("Teste estrutural: Tentando entrar na sala de administração antes da chave")
