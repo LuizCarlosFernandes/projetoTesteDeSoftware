@@ -24,6 +24,11 @@ public class Game
     protected Room currentRoom;
     private GameGUI gui;
 
+        //SCORE
+    private int movimentos = 0;
+    private int movimentosMaximos = 14;
+    private Room failed = new Room("fail", "src/images/failed.png");
+
         //VARIAVEIS DA MISSÃO
     private boolean hasKeyAdmin = false;
     private boolean hasKeyAuditorium = false;
@@ -58,6 +63,8 @@ public class Game
         lab = new Room("in a computing lab", "src/images/computing_lab.png");
         office = new Room("in the admin office", "src/images/admin.png");
         home = new Room("my home", "src/images/home.png");
+
+        failed = new Room("fail", "src/images/failed.png");
 
 
         // Inicialização dos itens (Missão)
@@ -139,10 +146,13 @@ public class Game
         if(currentRoom.getShortDescription().contains("home")){
            gui.updatePath("Parabêns, você finalizou o jogo.");
         }
+
+        processScorePhase1(movimentos);
     }
 
     //Retorna falso caso movimentação seja falha
     public boolean processDirection(String direction) {
+
         Room nextRoom = currentRoom.getExit(direction);
 
         if (nextRoom == null) {
@@ -169,8 +179,30 @@ public class Game
             gui.updatePath("Você foi para: " + currentRoom.getShortDescription());
             gui.updatePath(currentRoom.getExitString()); // Mostra saídas disponíveis no log
 
+
+
             checkMissionEvents(); // Verifica se venceu ou achou item
+            movimentos++;
             return true;
+        }
+    }
+
+    public void processScorePhase1(int movimentos) {
+        if (movimentos == movimentosMaximos) {
+            currentRoom = failed;
+            gui.updateImage(currentRoom.getImagePath());
+            gui.updatePath("Você falhou em concluir o jogo");
+        }
+        else if(currentRoom.getShortDescription().contains("home")){
+            if(movimentos <= 9){ //Caminho ótimo.
+                gui.updatePath("Você já sabia do caminho não é? Parabens NOTA MÁXIMA");
+            }
+            else if(movimentos <=11){
+                gui.updatePath("Não é muito bom, mas pelo menos você chegou lá");
+            }
+            else if(movimentos <= 13){
+                gui.updatePath("Quase não conseguia ein, to ficando decepcionado.");
+            }
         }
     }
 }
