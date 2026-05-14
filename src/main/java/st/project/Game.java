@@ -28,6 +28,7 @@ public class Game
     private int movimentos = 0;
     private int movimentosMaximos = 14;
     private Room failed = new Room("fail", "src/images/failed.png");
+    public boolean finished = false;
 
         //VARIAVEIS DA MISSÃO
     private boolean hasKeyAdmin = false;
@@ -145,6 +146,7 @@ public class Game
         //Evento 6: EOG
         if(currentRoom.getShortDescription().contains("home")){
            gui.updatePath("Parabêns, você finalizou o jogo.");
+           finished = true;
         }
 
         processScorePhase1(movimentos);
@@ -187,23 +189,30 @@ public class Game
         }
     }
 
-    public void processScorePhase1(int movimentos) {
+    //Processa pontuação em relação aos movimentos, retorno apenas para questões de teste.
+    public int processScorePhase1(int movimentos) {
         if (movimentos == movimentosMaximos) {
             currentRoom = failed;
             gui.updateImage(currentRoom.getImagePath());
             gui.updatePath("Você falhou em concluir o jogo");
+            return 0;
         }
-        else if(currentRoom.getShortDescription().contains("home")){
+        if(finished){
             if(movimentos <= 9){ //Caminho ótimo.
                 gui.updatePath("Você já sabia do caminho não é? Parabens NOTA MÁXIMA");
+                return 10;
             }
             else if(movimentos <=11){
                 gui.updatePath("Não é muito bom, mas pelo menos você chegou lá");
+                return 7;
             }
-            else if(movimentos <= 13){
+            else{
                 gui.updatePath("Quase não conseguia ein, to ficando decepcionado.");
+                return 5;
             }
+
         }
+        return 0;
     }
 }
 

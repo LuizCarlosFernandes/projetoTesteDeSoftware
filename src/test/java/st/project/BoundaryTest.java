@@ -2,8 +2,9 @@ package st.project;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,7 +76,7 @@ public class BoundaryTest {
         assertThat(locked).isTrue();
     }
 
-    // Método auxiliar para facilitar o acesso a atributos privados (flags de missão)
+    // Métod auxiliar para facilitar o acesso a atributos privados (flags de missão)
     private boolean getKeyState(Game game, String fieldName) throws Exception {
         Field field = Game.class.getDeclaredField(fieldName);
         field.setAccessible(true);
@@ -91,7 +92,7 @@ public class BoundaryTest {
         // ---------------------------------------------------------------------
 
         // 1. Falso: Entrar em uma sala que não contém "pub" (Início: outside)
-        // Isso cobre o primeiro "if" falhando na descrição.
+
         game.processDirection("cima"); // Vai para o Lab para limpar o estado
 
         // 2. Verdadeiro: Entrar no Pub e coletar a chave
@@ -202,4 +203,7 @@ public class BoundaryTest {
         keyGate.setAccessible(true);
         assertFalse((boolean) keyGate.get(game), "Deveria ter coletado a chave gate real");
     }
+
+
+
 }

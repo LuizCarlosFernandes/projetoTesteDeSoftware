@@ -112,4 +112,17 @@ public class StructuralTest {
         return null;
     }
 
+    @Test
+    @DisplayName("Testa processamento de pontuação do jogo")
+    public void testScores() {
+        Game game = new Game();
+        assertThat(game.processScorePhase1(16)).isEqualTo(0);
+
+        game.finished = true;
+        assertThat(game.processScorePhase1(9)).isEqualTo(10); //Nota máxima
+        assertThat(game.processScorePhase1(11)).isEqualTo(7);
+        assertThat(game.processScorePhase1(13)).isEqualTo(5);
+        assertThat(game.processScorePhase1(14)).isEqualTo(0);
+    }
+
 }
