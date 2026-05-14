@@ -104,12 +104,10 @@ public class Game
     private void checkMissionEvents() {
         // Evento 1: Encontrar a chave no Pub
         if(currentRoom.getShortDescription().contains("pub") && currentRoom.getItem() != null) {
-            if(currentRoom.getItem().getNome().equals("Chave do auditório")) {
                 gui.updatePath(currentRoom.getItem().getDescricao());
                 currentRoom.takeItem(); // Remove da sala
                 hasKeyAuditorium = true;
 
-            }
         }
 
 //        // Evento 2: Falar com o professor
@@ -119,21 +117,17 @@ public class Game
 
         //Evento 3: Pegar chave com o professor
         if(currentRoom.getShortDescription().contains("theatre") && currentRoom.getItem() != null) {
-            if(currentRoom.getItem().getNome().equals("Chave da sala de administração")){
                 gui.updatePath(currentRoom.getItem().getDescricao());
                 currentRoom.takeItem();
                 hasKeyAdmin = true;
-            }
         }
 
         //Evento 4: Pegar a chave na sala de administração
 
         if(currentRoom.getShortDescription().contains("office") && currentRoom.getItem() != null) {
-            if(currentRoom.getItem().getNome().equals("Chave do portão principal")){
                 gui.updatePath(currentRoom.getItem().getDescricao());
                 currentRoom.takeItem();
                 hasKeyGate = true;
-            }
         }
 
         //Evento 5: Abrir o portão e ir embora

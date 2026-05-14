@@ -37,4 +37,7 @@ public class DomainTest {
 
         assertThat(openGate).isTrue();
     }
+
+
+
 }
