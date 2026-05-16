@@ -30,10 +30,13 @@ public class Game
     private Room failed = new Room("fail", "src/images/failed.png");
     public boolean finished = false;
 
-        //VARIAVEIS DA MISSÃO
+    private int fase = 1;
+
+        //VARIAVEIS DA MISSÃO 1
     private boolean hasKeyAdmin = false;
     private boolean hasKeyAuditorium = false;
     private boolean hasKeyGate =  false;
+
 
 
     /**
@@ -42,7 +45,7 @@ public class Game
     public Game()
     {
         // 1. Cria as salas primeiro
-        createRooms();
+        phaseOne();
 
         // 2. Inicializa a GUI
         gui = new GameGUI(this);
@@ -50,25 +53,40 @@ public class Game
         printWelcome();
     }
 
+
     /**
      * Create all the rooms and link their exits together.
      */
-    private void createRooms()
+    private void phaseOne()
     {
-        Room outside, theatre, pub, lab, office, home;
 
-        // create the rooms
+        //Salas da fase 1
+        Room outside, theatre, pub, lab, office, gate;
+
         outside = new Room("outside the main entrance", "src/images/outside.jpeg");
         theatre = new Room("in a lecture theatre", "src/images/auditorium.png");
         pub = new Room("in the campus pub", "src/images/pub.jpeg");
         lab = new Room("in a computing lab", "src/images/computing_lab.png");
         office = new Room("in the admin office", "src/images/admin.png");
-        home = new Room("my home", "src/images/home.png");
+        gate = new Room("gate of the campus", "src/images/home.png");
 
-        failed = new Room("fail", "src/images/failed.png");
+        //Salas da fase 2
+
+        Room outsideGate, pharmacy, bakery, friendsHouse, apartments, streetOne, streetTwo;
+
+        outsideGate= new Room("Fora do campus", "");
+        pharmacy = new Room("Farmácia", "");
+        bakery = new Room("Padaria","");
+        friendsHouse = new Room("Casa do seu amigo","");
+        apartments = new Room("Complexo de apartamentos","");
+        streetOne = new Room("Rua comum", "");
+        streetTwo = new Room("Outra rua comum", "");
 
 
-        // Inicialização dos itens (Missão)
+        // ---------------------------------------------------------------------
+        // FASE 1
+        // ---------------------------------------------------------------------
+
         Item chaveAuditorium = new Item("Chave do auditório", "Usada para poder encontrar com o professor.");
         pub.setItem(chaveAuditorium); // A chave do auditorio está no pub
 
@@ -82,7 +100,7 @@ public class Game
         outside.setExit("direita", theatre);
         outside.setExit("cima", lab);
         outside.setExit("esquerda", pub);
-        outside.setExit("baixo", home);
+        outside.setExit("baixo", outsideGate);
 
         theatre.setExit("cima", outside);
 
@@ -94,6 +112,41 @@ public class Game
         office.setExit("baixo", lab);
 
         currentRoom = outside;  // start game outside
+
+
+
+        // ---------------------------------------------------------------------
+        // FASE 2
+        // ---------------------------------------------------------------------
+
+        /*
+          Caminho fase 2:
+          Gate -> farmácia (remédio) <-> padaria -> casa de amigo (pegar chave de casa)
+          prédio (sem chave, precisa passar na casa de amigo) -> fim fase 2;
+        * */
+        //Inicializando items
+
+        Item chaveDeCasa = new Item("Chave do seu prédio","Utilizada para entrar no seu prédio");
+        friendsHouse.setItem(chaveDeCasa);
+
+        Item pao = new Item("Pão para o seu amigo","Se você não levar o pao para seu amigo, ele " +
+                "vai te bater.");
+        bakery.setItem(pao);
+
+        //Inicializando saidas
+        outsideGate.setExit("cima", outside);
+        outsideGate.setExit("direita", pharmacy);
+        outsideGate.setExit("baixo ", streetOne);
+
+        pharmacy.setExit("esquerda", outsideGate);
+
+        streetOne.setExit("cima", outsideGate);
+        streetOne.setExit("esquerda", bakery);
+        streetOne.setExit("baixo", streetTwo);
+
+        streetTwo.setExit("cima", streetOne);
+        streetTwo.setExit("esquerda", friendsHouse);
+        streetTwo.setExit("baixo", apartments);
     }
 
     /**
@@ -118,19 +171,14 @@ public class Game
 
         }
 
-//        // Evento 2: Falar com o professor
-//        if(currentRoom.getShortDescription().contains("outside") && hasKeyAuditorium && !hasKeyAdmin) {
-//            gui.updatePath("Vá para o auditório para pegar a chave com o professor");
-//        }
-
-        //Evento 3: Pegar chave com o professor
+        //Evento 2: Pegar chave com o professor
         if(currentRoom.getShortDescription().contains("theatre") && currentRoom.getItem() != null) {
                 gui.updatePath(currentRoom.getItem().getDescricao());
                 currentRoom.takeItem();
                 hasKeyAdmin = true;
         }
 
-        //Evento 4: Pegar a chave na sala de administração
+        //Evento 3: Pegar a chave na sala de administração
 
         if(currentRoom.getShortDescription().contains("office") && currentRoom.getItem() != null) {
                 gui.updatePath(currentRoom.getItem().getDescricao());
@@ -138,14 +186,16 @@ public class Game
                 hasKeyGate = true;
         }
 
-        //Evento 5: Abrir o portão e ir embora
+        //Evento 4: Abrir o portão e ir embora
         if(currentRoom.getShortDescription().contains("outside") && hasKeyGate) {
             gui.updatePath("Agora você pode abrir o portão e ir embora.");
         }
 
-        //Evento 6: EOG
-        if(currentRoom.getShortDescription().contains("home")){
-           gui.updatePath("Parabêns, você finalizou o jogo.");
+        //Evento 5: FIM DE FASE 1
+        if(currentRoom.getShortDescription().contains("gate")){
+           gui.updatePath("Parabêns, você conseguiu sair do campus, agora o objetivo é chegar em casa." +
+                   "Não esqueça do seu amigo, ele ta com fome, e com sua chave...");
+           fase = 2;
            finished = true;
         }
 
@@ -169,7 +219,7 @@ public class Game
             gui.updatePath("A porta está trancada, a chave pode estar no barzinho");
             return false;
         }
-        else if(nextRoom.getShortDescription().contains("home") && !hasKeyGate){
+        else if(nextRoom.getShortDescription().contains("gate") && !hasKeyGate){
             gui.updatePath("O portão parece estar trancado, pegue a chave na sala de administração para abrir.");
             return false;
         }
@@ -194,7 +244,7 @@ public class Game
         if (movimentos == movimentosMaximos) {
             currentRoom = failed;
             gui.updateImage(currentRoom.getImagePath());
-            gui.updatePath("Você falhou em concluir o jogo");
+            gui.updatePath("Você falhou em terminar a fase....");
             return 0;
         }
         if(finished){
