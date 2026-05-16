@@ -24,12 +24,21 @@ public class Game
     protected Room currentRoom;
     private GameGUI gui;
 
+
+        //Checkpoints
+    private Room outside = new Room("outside the main entrance", "src/images/outside.jpeg");
+    private Room pharmacy = new Room("Farmácia", "");
+
+    private int reset = 0;
+
+
         //SCORE
     private int movimentos = 0;
     private int movimentosMaximos = 14;
     private Room failed = new Room("fail", "src/images/failed.png");
     public boolean finished = false;
 
+        //Nivel
     private int fase = 1;
 
         //VARIAVEIS DA MISSÃO 1
@@ -37,6 +46,9 @@ public class Game
     private boolean hasKeyAuditorium = false;
     private boolean hasKeyGate =  false;
 
+        //VARIAVEIS DA MISSAO 2
+    private boolean hasPao = false;
+    private boolean visitedPharmacy = false;
 
 
     /**
@@ -45,7 +57,7 @@ public class Game
     public Game()
     {
         // 1. Cria as salas primeiro
-        phaseOne();
+        init();
 
         // 2. Inicializa a GUI
         gui = new GameGUI(this);
@@ -57,13 +69,12 @@ public class Game
     /**
      * Create all the rooms and link their exits together.
      */
-    private void phaseOne()
+    private void init()
     {
 
         //Salas da fase 1
-        Room outside, theatre, pub, lab, office, gate;
+        Room theatre, pub, lab, office, gate;
 
-        outside = new Room("outside the main entrance", "src/images/outside.jpeg");
         theatre = new Room("in a lecture theatre", "src/images/auditorium.png");
         pub = new Room("in the campus pub", "src/images/pub.jpeg");
         lab = new Room("in a computing lab", "src/images/computing_lab.png");
@@ -72,10 +83,9 @@ public class Game
 
         //Salas da fase 2
 
-        Room outsideGate, pharmacy, bakery, friendsHouse, apartments, streetOne, streetTwo;
+        Room outsideGate, bakery, friendsHouse, apartments, streetOne, streetTwo;
 
         outsideGate= new Room("Fora do campus", "");
-        pharmacy = new Room("Farmácia", "");
         bakery = new Room("Padaria","");
         friendsHouse = new Room("Casa do seu amigo","");
         apartments = new Room("Complexo de apartamentos","");
@@ -162,42 +172,57 @@ public class Game
         gui.updatePath(currentRoom.getLongDescription());
     }
 
-    private void checkMissionEvents() {
-        // Evento 1: Encontrar a chave no Pub
-        if(currentRoom.getShortDescription().contains("pub") && currentRoom.getItem() != null) {
+    private void checkMissionEvents(int fase) {
+        // ---------------------------------------------------------------------
+        // FASE 1
+        // ---------------------------------------------------------------------
+        if(fase == 1){
+            // Evento 1: Encontrar a chave no Pub
+            if(currentRoom.getShortDescription().contains("pub") && currentRoom.getItem() != null) {
                 gui.updatePath(currentRoom.getItem().getDescricao());
                 currentRoom.takeItem(); // Remove da sala
                 hasKeyAuditorium = true;
 
-        }
+            }
 
-        //Evento 2: Pegar chave com o professor
-        if(currentRoom.getShortDescription().contains("theatre") && currentRoom.getItem() != null) {
+            //Evento 2: Pegar chave com o professor
+            if(currentRoom.getShortDescription().contains("theatre") && currentRoom.getItem() != null) {
                 gui.updatePath(currentRoom.getItem().getDescricao());
                 currentRoom.takeItem();
                 hasKeyAdmin = true;
-        }
+            }
 
-        //Evento 3: Pegar a chave na sala de administração
+            //Evento 3: Pegar a chave na sala de administração
 
-        if(currentRoom.getShortDescription().contains("office") && currentRoom.getItem() != null) {
+            if(currentRoom.getShortDescription().contains("office") && currentRoom.getItem() != null) {
                 gui.updatePath(currentRoom.getItem().getDescricao());
                 currentRoom.takeItem();
                 hasKeyGate = true;
+            }
+
+            //Evento 4: Abrir o portão e ir embora
+            if(currentRoom.getShortDescription().contains("outside") && hasKeyGate) {
+                gui.updatePath("Agora você pode abrir o portão e ir embora.");
+            }
+
+            //Evento 5: FIM DE FASE 1
+            if(currentRoom.getShortDescription().contains("gate")){
+                gui.updatePath("Parabêns, você conseguiu sair do campus, agora o objetivo é chegar em casa." +
+                        "Não esqueça do seu amigo, ele ta com fome, e com sua chave...");
+                fase = 2;
+                finished = true;
+            }
         }
 
-        //Evento 4: Abrir o portão e ir embora
-        if(currentRoom.getShortDescription().contains("outside") && hasKeyGate) {
-            gui.updatePath("Agora você pode abrir o portão e ir embora.");
+        // ---------------------------------------------------------------------
+        // FASE 2
+        // ---------------------------------------------------------------------
+
+        else if(fase == 2){
+
         }
 
-        //Evento 5: FIM DE FASE 1
-        if(currentRoom.getShortDescription().contains("gate")){
-           gui.updatePath("Parabêns, você conseguiu sair do campus, agora o objetivo é chegar em casa." +
-                   "Não esqueça do seu amigo, ele ta com fome, e com sua chave...");
-           fase = 2;
-           finished = true;
-        }
+
 
         processScorePhase1(movimentos);
     }
@@ -211,40 +236,98 @@ public class Game
             gui.updatePath("Não há saída para " + direction + "!");
             return false;
         }
-        else if(nextRoom.getShortDescription().contains("office") && !hasKeyAdmin){
+
+        if(isRoomLocked(nextRoom)){
+            return false;
+        }
+
+        if(isRoomTrapped(nextRoom)){
+            return false;
+        }
+
+
+        currentRoom = nextRoom;
+        // Atualiza Interface
+        gui.updateImage(currentRoom.getImagePath());
+        gui.updatePath("Você foi para: " + currentRoom.getShortDescription());
+        gui.updatePath(currentRoom.getExitString()); // Mostra saídas disponíveis no log
+
+
+        checkMissionEvents(fase); // Verifica se venceu ou achou item
+        movimentos++;
+        return true;
+    }
+
+    /*
+    Verifica se o ambiente está trancado
+    true se estiver trancado, false se aberto.
+     */
+    private boolean isRoomLocked(Room room) {
+        String description = room.getShortDescription();
+
+        if (description.contains("office") && !hasKeyAdmin) {
             gui.updatePath("A porta está trancada, ache o professor antes de ir para essa sala");
-            return false;
-        }
-        else if(nextRoom.getShortDescription().contains("theatre") && !hasKeyAuditorium){
-            gui.updatePath("A porta está trancada, a chave pode estar no barzinho");
-            return false;
-        }
-        else if(nextRoom.getShortDescription().contains("gate") && !hasKeyGate){
-            gui.updatePath("O portão parece estar trancado, pegue a chave na sala de administração para abrir.");
-            return false;
-        }
-        else {
-            currentRoom = nextRoom;
-
-            // Atualiza Interface
-            gui.updateImage(currentRoom.getImagePath());
-            gui.updatePath("Você foi para: " + currentRoom.getShortDescription());
-            gui.updatePath(currentRoom.getExitString()); // Mostra saídas disponíveis no log
-
-
-
-            checkMissionEvents(); // Verifica se venceu ou achou item
-            movimentos++;
             return true;
         }
+        if (description.contains("theatre") && !hasKeyAuditorium) {
+            gui.updatePath("A porta está trancada, a chave pode estar no barzinho");
+            return true;
+        }
+        if (description.contains("gate") && !hasKeyGate) {
+            gui.updatePath("O portão parece estar trancado, pegue a chave na sala de administração para abrir.");
+            return true;
+        }
+
+        return false;
+    }
+
+    /*
+    Verifica se o proximo ambiente possui armadilha, e se ela ainda está ativa.
+     */
+    public boolean isRoomTrapped(Room room){
+        if(room.getShortDescription().contains("amigo")){
+            if(hasPao){
+                //Possui pão, tudo certo.
+                return false;
+            }
+            else{
+                //Se não tem pao.
+                if(visitedPharmacy){
+                    //Funciona como checkpoint, retorna até a farmácia
+                    gui.updatePath("Você esqueceu do pão do seu amigo, ele te deu murro, você acordou na farmácia.");
+                    currentRoom = pharmacy;
+                }
+                else{
+                    gui.updatePath("Seu amigo te bateu tão forte que você percebeu que estava sonhando, e acordou na faculdade novamente..");
+                    gameReset();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //Reseta o progresso do jogo, caso reset mais de 3 vezes GAME OVER.
+    public void gameReset(){
+        if(reset <= 3){
+            movimentos = 0;
+            hasKeyAuditorium = hasKeyGate = hasKeyAdmin = false;
+            hasPao = visitedPharmacy = false;
+
+            currentRoom = outside;
+
+            reset++;
+        }
+        else{
+            failMission();
+        }
+
     }
 
     //Processa pontuação em relação aos movimentos, retorno apenas para questões de teste.
     public int processScorePhase1(int movimentos) {
         if (movimentos == movimentosMaximos) {
-            currentRoom = failed;
-            gui.updateImage(currentRoom.getImagePath());
-            gui.updatePath("Você falhou em terminar a fase....");
+            failMission();
             return 0;
         }
         if(finished){
@@ -260,9 +343,14 @@ public class Game
                 gui.updatePath("Quase não conseguia ein, to ficando decepcionado.");
                 return 5;
             }
-
         }
         return 0;
+    }
+
+    public void failMission(){
+        currentRoom = failed;
+        gui.updateImage(currentRoom.getImagePath());
+        gui.updatePath("você falhou em terminar a fase....");
     }
 }
 
