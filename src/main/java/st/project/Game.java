@@ -39,7 +39,7 @@ public class Game
     public boolean finished = false;
 
         //Nivel
-    private int fase = 1;
+    private int fase = 2;
 
         //VARIAVEIS DA MISSÃO 1
     private boolean hasKeyAdmin = false;
@@ -49,7 +49,7 @@ public class Game
         //VARIAVEIS DA MISSAO 2
     private boolean hasPao = false;
     private boolean visitedPharmacy = false;
-
+    private boolean hasApartmentKey = false;
 
     /**
      * Create the game and initialise its internal map.
@@ -150,8 +150,8 @@ public class Game
 
         pharmacy.setExit("direita", outsideGate);
 
-        streetOne.setExit("direita", outsideGate);
-        streetOne.setExit("cima", bakery);
+        streetOne.setExit("cima", outsideGate);
+        streetOne.setExit("direita", bakery);
         streetOne.setExit("baixo", streetTwo);
 
         bakery.setExit("direita", streetOne);
@@ -160,7 +160,7 @@ public class Game
         streetTwo.setExit("esquerda", friendsHouse);
         streetTwo.setExit("direita", apartments);
 
-        friendsHouse.setExit("",streetOne);
+        friendsHouse.setExit("baixo",streetTwo);
 
 
         apartments.setExit("",streetTwo);
@@ -229,7 +229,27 @@ public class Game
         // ---------------------------------------------------------------------
 
         else if(fase == 2){
-
+            //Saiu do campos
+            if(currentRoom.getShortDescription().contains("Fora")){
+                gui.updatePath("Você saiu do campus, agora o objetivo é chegar no seu apartamento\n" +
+                        "lembre que a chave está com teu amigo, que mora na sua rua, e ele está com MUITA FOME.");
+            }
+            //Foi na farmácia CHECKPOINT.
+            if(currentRoom.getShortDescription().contains("Farmácia")){
+                gui.updatePath("Você chegou na farmácia, não tem muito o que ver aqui\n" +
+                        "pelo menos agora você sabe onde comprar remédios....");
+                visitedPharmacy = true;
+            }
+            //Pegou o pão na padaria.
+            if(currentRoom.getShortDescription().contains("Padaria")){
+                gui.updatePath("Ainda bem que você pegou o pão pro seu amigo, ninguem sabe oque poderia acontecer sem isso.......");
+                hasPao = true;
+            }
+            //Entrou na casa do amigo, considerando que tem o pão, se não tiver é barrado antes.
+            if(currentRoom.getShortDescription().contains("amigo")){
+                gui.updatePath("Você entregou o pão, seu amigo estava com mt fome, e ele entrega sua chave de volta");
+                hasApartmentKey = true;
+            }
         }
 
 
@@ -288,6 +308,11 @@ public class Game
             return true;
         }
 
+        if(description.contains("apartamentos") && !hasApartmentKey){
+            gui.updatePath("Você precisa pegar a chave com seu amigo, cuidado que ele está com fome.");
+            return true;
+        }
+
         return false;
     }
 
@@ -306,6 +331,7 @@ public class Game
                     //Funciona como checkpoint, retorna até a farmácia
                     gui.updatePath("Você esqueceu do pão do seu amigo, ele te deu murro, você acordou na farmácia.");
                     currentRoom = pharmacy;
+                    gui.updateImage(currentRoom.getImagePath());
                 }
                 else{
                     gui.updatePath("Seu amigo te bateu tão forte que você percebeu que estava sonhando, e acordou na faculdade novamente..");
@@ -325,7 +351,7 @@ public class Game
             hasPao = visitedPharmacy = false;
 
             currentRoom = outside;
-
+            gui.updateImage(currentRoom.getImagePath());
             reset++;
         }
         else{
