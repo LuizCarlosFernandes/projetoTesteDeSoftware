@@ -27,7 +27,7 @@ public class Game
 
         //Checkpoints
     private Room outside = new Room("outside the main entrance", "src/images/outside.jpeg");
-    private Room pharmacy = new Room("Farmácia", "");
+    private Room pharmacy = new Room("Farmácia", "src/images/pharmacy.jpg");
 
     private int reset = 0;
 
@@ -85,12 +85,12 @@ public class Game
 
         Room outsideGate, bakery, friendsHouse, apartments, streetOne, streetTwo;
 
-        outsideGate= new Room("Fora do campus", "");
-        bakery = new Room("Padaria","");
-        friendsHouse = new Room("Casa do seu amigo","");
-        apartments = new Room("Complexo de apartamentos","");
-        streetOne = new Room("Rua comum", "");
-        streetTwo = new Room("Outra rua comum", "");
+        outsideGate= new Room("Fora do campus", "src/images/outsideGate.png");
+        bakery = new Room("Padaria","src/images/bakery.png");
+        friendsHouse = new Room("Casa do seu amigo","src/images/friendsHouse.jpg");
+        apartments = new Room("Complexo de apartamentos","src/images/home.png");
+        streetOne = new Room("Rua comum", "src/images/StreetOne.png");
+        streetTwo = new Room("Outra rua comum", "src/images/streetTwo.png");
 
 
         // ---------------------------------------------------------------------
@@ -121,7 +121,7 @@ public class Game
 
         office.setExit("baixo", lab);
 
-        currentRoom = outside;  // start game outside
+
 
 
 
@@ -146,17 +146,27 @@ public class Game
         //Inicializando saidas
         outsideGate.setExit("cima", outside);
         outsideGate.setExit("direita", pharmacy);
-        outsideGate.setExit("baixo ", streetOne);
+        outsideGate.setExit("baixo", streetOne);
 
-        pharmacy.setExit("esquerda", outsideGate);
+        pharmacy.setExit("direita", outsideGate);
 
-        streetOne.setExit("cima", outsideGate);
-        streetOne.setExit("esquerda", bakery);
+        streetOne.setExit("direita", outsideGate);
+        streetOne.setExit("cima", bakery);
         streetOne.setExit("baixo", streetTwo);
+
+        bakery.setExit("direita", streetOne);
 
         streetTwo.setExit("cima", streetOne);
         streetTwo.setExit("esquerda", friendsHouse);
-        streetTwo.setExit("baixo", apartments);
+        streetTwo.setExit("direita", apartments);
+
+        friendsHouse.setExit("",streetOne);
+
+
+        apartments.setExit("",streetTwo);
+
+
+        currentRoom = outsideGate;  // start game outside
     }
 
     /**
