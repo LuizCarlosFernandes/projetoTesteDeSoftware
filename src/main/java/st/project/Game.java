@@ -218,10 +218,10 @@ public class Game
             }
 
             //Evento 5: FIM DE FASE 1
-            if(currentRoom.getShortDescription().contains("gate")){
+            if(currentRoom.getShortDescription().contains("Fora")){
                 gui.updatePath("Parabêns, você conseguiu sair do campus, agora o objetivo é chegar em casa." +
                         "Não esqueça do seu amigo, ele ta com fome, e com sua chave...");
-                fase = 2;
+                this.fase = 2;
                 finished = true;
             }
         }
@@ -229,8 +229,8 @@ public class Game
         // ---------------------------------------------------------------------
         // FASE 2
         // ---------------------------------------------------------------------
-
-        else if(fase == 2){
+        //Não precisa de if(fase == 2) pois não tem mais de 2 fases.
+        else{
             //Saiu do campos
             if(currentRoom.getShortDescription().contains("Fora")){
                 gui.updatePath("Você saiu do campus, agora o objetivo é chegar no seu apartamento\n" +
@@ -256,7 +256,7 @@ public class Game
 
 
 
-        processScorePhase1(movimentos);
+        //processScorePhase1(movimentos);
     }
 
     //Retorna falso caso movimentação seja falha
@@ -353,7 +353,7 @@ public class Game
             hasKeyAuditorium = hasKeyGate = hasKeyAdmin = false;
             hasPao = visitedPharmacy = hasApartmentKey = false;
 
-            currentRoom = outside;
+            this.init();
             fase = 1;
             gui.updateImage(currentRoom.getImagePath());
             reset++;

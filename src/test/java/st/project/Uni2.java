@@ -134,7 +134,7 @@ public class Uni2 {
     // ---------------------------------------------------------
 
     @Property
-    @DisplayName("Propriedade: Comandos aleatórios não devem quebrar o estado do jogo")
+    //@DisplayName("Propriedade: Comandos aleatórios não devem quebrar o estado do jogo")
     public void anyDirectionCommandShouldReturnBooleanWithoutException(
             @ForAll("randomDirections") String direction) {
 

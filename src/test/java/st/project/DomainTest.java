@@ -49,6 +49,26 @@ public class DomainTest {
         boolean openGate = game.processDirection("baixo");
 
         assertThat(openGate).isTrue();
+
+        // 5.Pegar pão
+        game.processDirection("baixo");
+
+        boolean pao = game.processDirection("direita");
+        assertThat(pao).isTrue();
+
+        // Pegar chave
+        game.processDirection("direita");
+        game.processDirection("baixo");
+
+        boolean apartmentKey = game.processDirection("esquerda");
+        assertThat(apartmentKey).isTrue();
+
+        //Entrar na vila academica.
+        game.processDirection("baixo");
+
+        boolean finished = game.processDirection("direita");
+        assertThat(finished).isTrue();
+
     }
 
 
