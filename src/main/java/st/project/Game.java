@@ -39,7 +39,7 @@ public class Game
     public boolean finished = false;
 
         //Nivel
-    private int fase = 2;
+    private int fase = 1;
 
         //VARIAVEIS DA MISSÃO 1
     private boolean hasKeyAdmin = false;
@@ -56,13 +56,15 @@ public class Game
      */
     public Game()
     {
-        // 1. Cria as salas primeiro
+
         init();
+    }
 
-        // 2. Inicializa a GUI
-        gui = new GameGUI(this);
-
-        printWelcome();
+    public void setGui(GameGUI gui){
+        this.gui = gui;
+        if(this.gui!= null){
+            printWelcome();
+        }
     }
 
 
@@ -166,7 +168,7 @@ public class Game
         apartments.setExit("",streetTwo);
 
 
-        currentRoom = outsideGate;  // start game outside
+        currentRoom = outside;  // start game outside
     }
 
     /**
@@ -303,7 +305,7 @@ public class Game
             gui.updatePath("A porta está trancada, a chave pode estar no barzinho");
             return true;
         }
-        if (description.contains("gate") && !hasKeyGate) {
+        if (description.contains("Fora") && !hasKeyGate) {
             gui.updatePath("O portão parece estar trancado, pegue a chave na sala de administração para abrir.");
             return true;
         }
@@ -347,10 +349,12 @@ public class Game
     public void gameReset(){
         if(reset <= 3){
             movimentos = 0;
+            finished = false;
             hasKeyAuditorium = hasKeyGate = hasKeyAdmin = false;
-            hasPao = visitedPharmacy = false;
+            hasPao = visitedPharmacy = hasApartmentKey = false;
 
             currentRoom = outside;
+            fase = 1;
             gui.updateImage(currentRoom.getImagePath());
             reset++;
         }
