@@ -1,5 +1,6 @@
 package st.project;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -8,10 +9,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DomainTest {
 
+    private Game game;
+    private GameGUI gui;
+
+
+    @BeforeEach
+    public void setUp() {
+        game = new Game();
+        gui = new GameGUI(game);
+        game.setGui(gui); // Aplicação do Dublê de Teste
+    }
+
+
     @Test
     @DisplayName("Testa progressão completa da missão do jogo")
     public void testFullMissionProgression() {
-        Game game = new Game();
+
 
         // 1. Ir ao Pub pegar a primeira chave
         game.processDirection("esquerda");

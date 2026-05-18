@@ -1,5 +1,6 @@
 package st.project;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,9 +14,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class StructuralTest {
 
-    Game game = new Game();
-    GameGUI gui = new GameGUI(game);
+    private Game game;
+    private GameGUI gui;
 
+
+    @BeforeEach
+    public void setUp() {
+        game = new Game();
+        gui = new GameGUI(game);
+        game.setGui(gui); // Aplicação do Dublê de Teste
+    }
 
     @Test
     @DisplayName("Testa funcionamento das saidas")
@@ -115,7 +123,7 @@ public class StructuralTest {
     @Test
     @DisplayName("Testa processamento de pontuação do jogo")
     public void testScores() {
-        Game game = new Game();
+
         assertThat(game.processScorePhase1(16)).isEqualTo(0);
 
         game.finished = true;

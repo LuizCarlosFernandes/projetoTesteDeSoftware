@@ -1,7 +1,9 @@
 package st.project;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 
@@ -12,10 +14,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BoundaryTest {
 
+    private Game game;
+    private GameGUI gui;
+
+
+    @BeforeEach
+    public void setUp() {
+        game = new Game();
+        gui = new GameGUI(game);
+        game.setGui(gui); // Aplicação do Dublê de Teste
+    }
+
+
     @Test
     @DisplayName("Testa comandos inválidos de movimento")
     public void testInvalidDirectionMovement() {
-        Game game = new Game();
 
         boolean result = game.processDirection("atras");
         assertFalse(result);
@@ -24,20 +37,19 @@ public class BoundaryTest {
     @Test
     @DisplayName("Testa acesso a locais trancados.")
     public void testLockedDoorAccess() {
-        Game game = new Game();
-
+        game.gameReset();
         // Caminho: outside -> lab -> office
         game.processDirection("cima");
         boolean locked = game.processDirection("cima");
 
         assertThat(locked).isFalse();
 
-        game = new Game(); //Reinicia o jogo
+        game.gameReset(); //Reinicia o jogo
         locked = game.processDirection("baixo"); //Tenta sair sem a chave
 
         assertThat(locked).isFalse();
 
-        game = new Game();
+        game.gameReset();
         locked = game.processDirection("direita"); //Tenta entrar direto no auditório
         assertThat(locked).isFalse();
     }
@@ -45,7 +57,7 @@ public class BoundaryTest {
     @Test
     @DisplayName("Testa acesso a local trancado independente de possuir outras chaves")
     public void testLockedDoorAccessWithKeys() {
-        Game game = new Game();
+
         //Caminho: outside -> pub -> outside -> lab -> office
         game.processDirection("esquerda");
         game.processDirection("baixo");
@@ -58,7 +70,7 @@ public class BoundaryTest {
     @Test
     @DisplayName("Testa comandos válidos de movimento")
     public void testvalidDirectionMovement() {
-        Game game = new Game();
+
 
         boolean result = game.processDirection("cima");
         assertThat(result).isTrue();
@@ -67,7 +79,7 @@ public class BoundaryTest {
     @Test
     @DisplayName("Testa acesso a locais trancados possuindo a chave.")
     public void testUnlockedDoorAccess() {
-        Game game = new Game();
+
         // Caminho: outside -> pub -> outside -> auditorium
         game.processDirection("esquerda");
         game.processDirection("baixo");
@@ -85,7 +97,7 @@ public class BoundaryTest {
 
     @Test
     public void testCheckMissionEventsBranchCoverage() throws Exception {
-        Game game = new Game();
+
 
         // ---------------------------------------------------------------------
         // BRANCHES DO EVENTO 1 (PUB)
@@ -146,7 +158,7 @@ public class BoundaryTest {
 
     @Test
     public void testItemNameMismatchBranches() throws Exception {
-        Game game = new Game();
+
 
         // 1. Acessar a currentRoom via reflexão para manipulação
         Field roomField = Game.class.getDeclaredField("currentRoom");
@@ -184,7 +196,7 @@ public class BoundaryTest {
      */
     @Test
     public void testItemNameMatchBranches() throws Exception {
-        Game game = new Game();
+
 
         // Simular sequência correta para chegar nos itens reais
         game.processDirection("esquerda"); // Pega chave 1 no Pub
