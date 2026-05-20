@@ -37,6 +37,7 @@ public class Game
     private int movimentosMaximos = 14;
     private Room failed = new Room("fail", "src/images/failed.png");
     public boolean finished = false;
+    public boolean gameOver = false;
 
         //Nivel
     private int fase = 1;
@@ -62,9 +63,7 @@ public class Game
 
     public void setGui(GameGUI gui){
         this.gui = gui;
-        if(this.gui!= null){
-            printWelcome();
-        }
+        printWelcome();
     }
 
 
@@ -81,7 +80,7 @@ public class Game
         pub = new Room("in the campus pub", "src/images/pub.jpeg");
         lab = new Room("in a computing lab", "src/images/computing_lab.png");
         office = new Room("in the admin office", "src/images/admin.png");
-        gate = new Room("gate of the campus", "src/images/home.png");
+        //gate = new Room("gate of the campus", "src/images/home.png"); não mais usado.
 
         //Salas da fase 2
 
@@ -294,7 +293,7 @@ public class Game
     Verifica se o ambiente está trancado
     true se estiver trancado, false se aberto.
      */
-    private boolean isRoomLocked(Room room) {
+    public boolean isRoomLocked(Room room) {
         String description = room.getShortDescription();
 
         if (description.contains("office") && !hasKeyAdmin) {
@@ -342,12 +341,14 @@ public class Game
                 return true;
             }
         }
-        return false;
+        else {
+            return false;
+        }
     }
 
     //Reseta o progresso do jogo, caso reset mais de 3 vezes GAME OVER.
     public void gameReset(){
-        if(reset <= 3){
+        if(reset < 3){
             movimentos = 0;
             finished = false;
             hasKeyAuditorium = hasKeyGate = hasKeyAdmin = false;
@@ -391,6 +392,7 @@ public class Game
         currentRoom = failed;
         gui.updateImage(currentRoom.getImagePath());
         gui.updatePath("você falhou em terminar a fase....");
+        gameOver = true;
     }
 }
 

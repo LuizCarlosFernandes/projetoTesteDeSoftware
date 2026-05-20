@@ -10,7 +10,6 @@ import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
@@ -34,7 +33,8 @@ public class Uni2 {
     @DisplayName("MC/DC para isRoomLocked: (Office == True, !hasKeyAdmin == True) -> True")
     public void testIsRoomLocked_OfficeNoKey() throws Exception {
         // Testa a condição: description.contains("office") && !hasKeyAdmin
-        boolean result = game.processDirection("cima"); // Vai Lab
+        boolean result;
+        game.processDirection("cima"); // Vai Lab
         result = game.processDirection("cima"); // Tenta Office
 
         assertThat(result).isFalse(); // Retorna falso porque isRoomLocked impede
@@ -43,7 +43,7 @@ public class Uni2 {
 
     @Test
     @DisplayName("MC/DC para isRoomLocked: (Office == True, !hasKeyAdmin == False) -> False")
-    public void testIsRoomLocked_OfficeWithKey() throws Exception {
+    public void testIsRoomLocked_OfficeWithKey(){
         // Coleta a chave do auditório e depois do admin para acessar o office
         game.processDirection("esquerda"); // pub (Pega chave auditório)
         game.processDirection("baixo");    // fora
@@ -97,7 +97,7 @@ public class Uni2 {
 
     @Test
     @DisplayName("Teste de Domínio: Armadilha da Fase 2 (isRoomTrapped)")
-    public void testTrappedRoomWithoutBread() throws Exception {
+    public void testTrappedRoomAndLockedsRooms() throws Exception {
         // Configura o estado para Fase 2 diretamente via reflexão para testar o domínio
         Field faseField = Game.class.getDeclaredField("fase");
         faseField.setAccessible(true);
@@ -110,8 +110,35 @@ public class Uni2 {
 
         boolean isTrapped = game.isRoomTrapped(friendsHouse);
 
+
         assertThat(isTrapped).isTrue();
         verify(mockGui, atLeastOnce()).updatePath(Mockito.contains("sonhando, e acordou"));
+
+        //Verifica também se a vila academica está de fato trancada.
+        Room apartments = new Room("Complexo de apartamentos","src/images/home.png");
+        currentRoomField.set(game, apartments);
+
+        boolean isLocked = game.isRoomLocked(apartments);
+        assertThat(isLocked).isTrue();
+
+        //Visita farmácia, e dps entra tenta entrar, sem pão, na casa do amigo
+        Field pharmacyField = Game.class.getDeclaredField("visitedPharmacy");
+        pharmacyField.setAccessible(true);
+        pharmacyField.set(game, true);
+
+        currentRoomField.set(game, friendsHouse);
+        boolean checkpointTrap = game.isRoomTrapped(friendsHouse);
+        assertThat(checkpointTrap).isTrue();
+
+
+        //Verifica se um ambiente sem armadilha, possui alguma
+
+        Room pharmacy = new Room("Farmácia", "src/images/pharmacy.jpg");
+        currentRoomField.set(game, pharmacy);
+
+        boolean inexistentTrap = game.isRoomTrapped(pharmacy);
+        assertThat(inexistentTrap).isFalse();
+
     }
 
     // ---------------------------------------------------------
@@ -127,6 +154,32 @@ public class Uni2 {
         verify(mockGui).updatePath(Mockito.contains("Não há saída"));
         // Verifica se a imagem NÃO foi atualizada pois não trocou de sala
         //Mockito.verify(mockGui, Mockito.never()).updateImage(anyString());
+    }
+
+    @Test
+    @DisplayName("Testa se processDirection é interrompido e retorna false ao entrar em armadilha")
+    public void testProcessDirectionBlockedByTrap() throws Exception {
+        Room startRoom = new Room("Rua", "src/images/street.png");
+        Room trapRoom = new Room("Casa do seu amigo", "src/images/friendsHouse.jpg");
+
+        // 2. Conecta as duas salas para garantir que nextRoom NÃO seja null
+        startRoom.setExit("norte", trapRoom);
+
+        // 3. Injeta a sala inicial no currentRoom do jogo via Reflexão
+        Field currentRoomField = Game.class.getDeclaredField("currentRoom");
+        currentRoomField.setAccessible(true);
+        currentRoomField.set(game, startRoom);
+
+        // 4. Garante que o jogador NÃO tem o pão (para ativar a armadilha)
+        Field hasPaoField = Game.class.getDeclaredField("hasPao");
+        hasPaoField.setAccessible(true);
+        hasPaoField.set(game, false);
+
+        // 5. Tenta se mover para a direção da armadilha
+        boolean enteredTrappedRoom = game.processDirection("norte");
+
+        // Asserção: A barreira if(isRoomTrapped(nextRoom)) deve acionar e retornar false
+        assertThat(enteredTrappedRoom).isFalse();
     }
 
     // ---------------------------------------------------------

@@ -3,7 +3,6 @@ package st.project;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 
@@ -52,6 +51,9 @@ public class BoundaryTest {
         game.gameReset();
         locked = game.processDirection("direita"); //Tenta entrar direto no auditório
         assertThat(locked).isFalse();
+
+        game.gameReset();
+
     }
 
     @Test
@@ -214,6 +216,20 @@ public class BoundaryTest {
         Field keyGate = Game.class.getDeclaredField("hasKeyGate");
         keyGate.setAccessible(true);
         assertFalse((boolean) keyGate.get(game), "Deveria ter coletado a chave gate real");
+    }
+
+    @Test
+    public void testGameReset(){
+        assertThat(game.gameOver).isFalse();
+
+        game.gameReset();
+        game.gameReset();
+        game.gameReset();
+        game.gameReset();
+
+        //Reseta 4 vezes, logo GAME OVER.
+
+        assertThat(game.gameOver).isTrue();
     }
 
 
