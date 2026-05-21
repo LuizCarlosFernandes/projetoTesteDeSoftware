@@ -90,7 +90,7 @@ public class Uni2 {
             game.processDirection("baixo");
         }
 
-        int score = game.processScorePhase1(14);
+        int score = game.processScorePhase1(1, 14);
         assertThat(score).isEqualTo(0);
         verify(mockGui, atLeastOnce()).updatePath(Mockito.contains("você falhou"));
     }
