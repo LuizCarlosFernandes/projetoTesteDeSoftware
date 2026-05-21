@@ -222,6 +222,7 @@ public class Game
                         "Não esqueça do seu amigo, ele ta com fome, e com sua chave...");
                 this.fase = 2;
                 finished = true;
+                movimentos = 0;
             }
         }
 
@@ -234,6 +235,7 @@ public class Game
             if(currentRoom.getShortDescription().contains("Fora")){
                 gui.updatePath("Você saiu do campus, agora o objetivo é chegar no seu apartamento\n" +
                         "lembre que a chave está com teu amigo, que mora na sua rua, e ele está com MUITA FOME.");
+                finished = false;
             }
             //Foi na farmácia CHECKPOINT.
             if(currentRoom.getShortDescription().contains("Farmácia")){
@@ -251,11 +253,14 @@ public class Game
                 gui.updatePath("Você entregou o pão, seu amigo estava com mt fome, e ele entrega sua chave de volta");
                 hasApartmentKey = true;
             }
+            if(currentRoom.getShortDescription().contains("Complexo")){
+                finished = true;
+            }
         }
 
 
 
-        //processScorePhase1(movimentos);
+        processScorePhase1(fase ,movimentos);
     }
 
     //Retorna falso caso movimentação seja falha
@@ -366,27 +371,41 @@ public class Game
     }
 
     //Processa pontuação em relação aos movimentos, retorno apenas para questões de teste.
-    public int processScorePhase1(int movimentos) {
+    public int processScorePhase1(int fase ,int movimentos) {
         if (movimentos == movimentosMaximos) {
             failMission();
             return 0;
         }
-        if(finished){
-            if(movimentos <= 9){ //Caminho ótimo.
-                gui.updatePath("Você já sabia do caminho não é? Parabens NOTA MÁXIMA");
-                return 10;
+        if (fase == 1) {
+            if (finished) {
+                if (movimentos <= 9) { //Caminho ótimo.
+                    gui.updatePath("Você já sabia do caminho não é? Parabens NOTA MÁXIMA");
+                    return 10;
+                } else if (movimentos <= 11) {
+                    gui.updatePath("Não é muito bom, mas pelo menos você chegou lá");
+                    return 7;
+                } else {
+                    gui.updatePath("Quase não conseguia ein, to ficando decepcionado.");
+                    return 5;
+                }
             }
-            else if(movimentos <=11){
-                gui.updatePath("Não é muito bom, mas pelo menos você chegou lá");
-                return 7;
-            }
-            else{
-                gui.updatePath("Quase não conseguia ein, to ficando decepcionado.");
-                return 5;
+            } else { //Fase 2
+            if (finished) {
+                if (movimentos <= 7) { //Caminho ótimo.
+                    gui.updatePath("Você não quis passar na farmácia? correto, porém perigoso");
+                    return 10;
+                } else if (movimentos <= 9) {
+                    gui.updatePath("Jogou perfeitamente, e ainda passou na farmacia. não é mt ruim");
+                    return 7;
+                } else {
+                    gui.updatePath("hmmm, andou um pouco mais, mas pelo menos chegou .");
+                    return 5;
+                }
             }
         }
         return 0;
     }
+
 
     public void failMission(){
         currentRoom = failed;
